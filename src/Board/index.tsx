@@ -1,11 +1,11 @@
-import { FunctionComponent, useMemo, MouseEvent, Dispatch, SetStateAction } from 'react';
+import { FunctionComponent, useMemo, MouseEvent } from 'react';
 import { Row } from '../Row';
 
 import styles from './styles.module.css'
 
 export interface BoardProps {
   data: boolean[][];
-  setData: Dispatch<SetStateAction<boolean[][]>>;
+  setData: (data: boolean[][]) => void;
 }
 
 export const Board: FunctionComponent<BoardProps> = ({ data, setData }) => {
@@ -27,17 +27,26 @@ export const Board: FunctionComponent<BoardProps> = ({ data, setData }) => {
     const row = Number(dataset.row);
     const col = Number(dataset.col);
 
-    setData(data => {
-      // create a deep copy of array
-      const newData = Array.from(data.map(row => Array.from(row)));
+    const newData = Array.from(data.map(row => Array.from(row)));
 
-      const currentState = newData[row][col];
+    const currentState = newData[row][col];
 
-      // modify cell according to row and col that we got from target
-      newData[row][col] = !currentState;
+    // modify cell according to row and col that we got from target
+    newData[row][col] = !currentState;
 
-      return newData;
-    })
+    setData(newData);
+
+    // setData(data => {
+    //   // create a deep copy of array
+    //   const newData = Array.from(data.map(row => Array.from(row)));
+
+    //   const currentState = newData[row][col];
+
+    //   // modify cell according to row and col that we got from target
+    //   newData[row][col] = !currentState;
+
+    //   return newData;
+    // })
   }
 
   return (

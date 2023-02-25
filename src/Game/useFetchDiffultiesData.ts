@@ -3,12 +3,15 @@ import { useState, useEffect, useMemo } from 'react';
 
 const url = 'http://demo7919674.mockable.io/';
 
+export const DifficultyName = ['Easy', 'Normal', 'Hard'] as const
+export type DifficlutyName = typeof DifficultyName[number];
+
 interface Difficulty {
-  name: string;
+  name: DifficlutyName;
   field: number;
 }
 
-type MappedDiffuculties = Record<string, number>; 
+type MappedDiffuculties = Record<DifficlutyName, number>; 
 
 const fetchDifficultiesData = async () => {
   try {
@@ -21,7 +24,7 @@ const fetchDifficultiesData = async () => {
   }
 }
 
-export const useFetchDifficultiesData = (): MappedDiffuculties => {
+export const useFetchDifficultiesData = (): MappedDiffuculties | undefined => {
   const [difficultiesData, setDifficultiesData] = useState<Difficulty[]>([]);
 
   useEffect(() => {
@@ -29,10 +32,12 @@ export const useFetchDifficultiesData = (): MappedDiffuculties => {
   }, []);
 
   return useMemo(() =>
-    difficultiesData.reduce((acc: MappedDiffuculties, curr) => ({
-      ...acc,
-      [curr.name]: curr.field
-    }), {}),
+    difficultiesData.length === 0
+      ? undefined
+      : difficultiesData.reduce((acc: MappedDiffuculties, curr) => ({
+        ...acc,
+        [curr.name]: curr.field
+      }), {} as MappedDiffuculties),
     [difficultiesData]
   );
 }

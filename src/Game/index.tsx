@@ -1,12 +1,12 @@
 import { FunctionComponent, useState, useMemo, useCallback } from 'react';
 import { Board } from '../Board';
-import { useFetchDifficultiesData } from './useFetchDiffultiesData';
-import Dropdown from 'react-bootstrap/Dropdown';
-import Button from 'react-bootstrap/Button';
-import { createCleanBoard } from './utils';
+import { useFetchDifficultiesData, DifficlutyName } from './useFetchDiffultiesData';
+import { createCleanBoard, compareBoards } from './utils';
 import { noop } from '../utils/noop';
+import { patterns } from './patterns';
 
 import styles from './styles.module.css';
+import { Controls } from '../Controls';
 
 const defaultBoardSize = 5;
 
@@ -15,20 +15,23 @@ export const Game: FunctionComponent = () => {
 
   const [boardData, setBoardData] = useState<boolean[][]>(createCleanBoard(defaultBoardSize));
 
-  const [difficulty, setDifficulty] = useState<string>('');
+  const [difficulty, setDifficulty] = useState<DifficlutyName>('Easy');
   const [isGameStarted, setIsGameStarted] = useState<boolean>(false);
+  const [isExpectedVisible, setIsExpectedVisible] = useState<boolean>(false);
 
-  const levels = useMemo(() => Object.keys(difficultiesData), [difficultiesData]);
+  const levels = useMemo(() => difficultiesData ? Object.keys(difficultiesData) : [], [difficultiesData]);
 
-  const resetBoardByDifficulty = useCallback((level: string) => {
-    const size = difficultiesData[level];
+  const resetBoardByDifficulty = useCallback((difficulty: DifficlutyName) => {
+    if (!difficultiesData) return;
+
+    const size = difficultiesData[difficulty];
 
     if (!size) return;
 
     setBoardData(createCleanBoard(size));
   }, [difficultiesData, setBoardData]);
 
-  const selectDifficulty = (difficulty: string) => () => {
+  const selectDifficulty = (difficulty: DifficlutyName) => {
     setDifficulty(difficulty);
     
     // if game started do not change current board
@@ -50,7 +53,30 @@ export const Game: FunctionComponent = () => {
     resetBoardByDifficulty(difficulty)
   }, [difficulty, setIsGameStarted, resetBoardByDifficulty]);
 
-  const updateBoardData = useMemo(() => isGameStarted ? setBoardData : noop, [isGameStarted]);
+  const toggleIsExpectedVisible = () => {
+    setIsExpectedVisible(s => !s);
+  }
+
+  const expectedResult = useMemo(() => {
+    const expectedData = patterns[difficulty];
+
+    if (!isGameStarted || !isExpectedVisible) return [];
+
+    return expectedData;
+  }, [isGameStarted, isExpectedVisible, difficulty])
+
+  const updateBoardData = useMemo(() => {
+    if (!isGameStarted) return noop;
+
+    return (data: boolean[][]) => {
+      setBoardData(data);
+
+      if (!compareBoards(data, expectedResult)) {
+        // needs a smallest timeout since modal appers faster then the square updates
+        setTimeout(() => alert('Congratulations, you passed the level correctly!'));
+      }
+    }
+  }, [isGameStarted, expectedResult]);
 
   const startButtonHandler = useMemo(() => isGameStarted ? restartGame : startGame, [isGameStarted, startGame, restartGame]);
 
@@ -59,20 +85,22 @@ export const Game: FunctionComponent = () => {
   return (
     <div className={styles.wrap}>
       <div className={styles.controls}>
-        <Dropdown>
-          <Dropdown.Toggle variant='success' id='level'>
-            {difficulty || 'Pick'}
-          </Dropdown.Toggle>
-
-          <Dropdown.Menu>
-            {levels.map(name => (
-              <Dropdown.Item key={name} onClick={selectDifficulty(name)}>{name}</Dropdown.Item>
-            ))}
-          </Dropdown.Menu>
-        </Dropdown>
-        <Button onClick={startButtonHandler}>{startButtonText}</Button>
+        <Controls
+          currentDifficulty={difficulty}
+          difficulties={levels as DifficlutyName[]}
+          selectDifficulty={selectDifficulty}
+          startButtonText={startButtonText}
+          onStart={startButtonHandler}
+          toggleIsExpectedVisible={toggleIsExpectedVisible}
+          isExpectedVisible={isExpectedVisible}
+        />
       </div>
-      <Board data={boardData} setData={updateBoardData} />
+      <div className={styles.board}>
+        <Board data={boardData} setData={updateBoardData} />
+        <div className={styles['expected-board']}>
+          <Board data={expectedResult} setData={noop} />
+        </div>
+      </div>
     </div>
   )
 }
