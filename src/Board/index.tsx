@@ -35,18 +35,6 @@ export const Board: FunctionComponent<BoardProps> = ({ data, setData }) => {
     newData[row][col] = !currentState;
 
     setData(newData);
-
-    // setData(data => {
-    //   // create a deep copy of array
-    //   const newData = Array.from(data.map(row => Array.from(row)));
-
-    //   const currentState = newData[row][col];
-
-    //   // modify cell according to row and col that we got from target
-    //   newData[row][col] = !currentState;
-
-    //   return newData;
-    // })
   }
 
   return (

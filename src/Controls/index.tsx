@@ -9,20 +9,16 @@ export interface ControlsProps {
   difficulties: DifficlutyName[];
   currentDifficulty: DifficlutyName;
   startButtonText: string;
-  isExpectedVisible: boolean;
   selectDifficulty: (difficulty: DifficlutyName) => void;
   onStart: () => void;
-  toggleIsExpectedVisible: () => void;
 }
 
 export const Controls: FunctionComponent<ControlsProps> = ({
   difficulties,
   currentDifficulty,
   selectDifficulty,
-  isExpectedVisible,
   startButtonText,
   onStart,
-  toggleIsExpectedVisible
 }) => {
   return (
     <div className={styles.wrap}>
@@ -38,7 +34,6 @@ export const Controls: FunctionComponent<ControlsProps> = ({
         </Dropdown.Menu>
       </Dropdown>
       <Button onClick={onStart}>{startButtonText}</Button>
-      <Button onClick={toggleIsExpectedVisible}>{isExpectedVisible ? 'Hide' : 'Show'} expected</Button>
     </div>
   )
 }

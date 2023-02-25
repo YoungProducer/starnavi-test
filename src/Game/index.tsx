@@ -1,9 +1,8 @@
 import { FunctionComponent, useState, useMemo, useCallback } from 'react';
 import { Board } from '../Board';
 import { useFetchDifficultiesData, DifficlutyName } from './useFetchDiffultiesData';
-import { createCleanBoard, compareBoards } from './utils';
+import { createCleanBoard } from './utils';
 import { noop } from '../utils/noop';
-import { patterns } from './patterns';
 
 import styles from './styles.module.css';
 import { Controls } from '../Controls';
@@ -17,7 +16,6 @@ export const Game: FunctionComponent = () => {
 
   const [difficulty, setDifficulty] = useState<DifficlutyName>('Easy');
   const [isGameStarted, setIsGameStarted] = useState<boolean>(false);
-  const [isExpectedVisible, setIsExpectedVisible] = useState<boolean>(false);
 
   const levels = useMemo(() => difficultiesData ? Object.keys(difficultiesData) : [], [difficultiesData]);
 
@@ -53,28 +51,14 @@ export const Game: FunctionComponent = () => {
     resetBoardByDifficulty(difficulty)
   }, [difficulty, setIsGameStarted, resetBoardByDifficulty]);
 
-  const toggleIsExpectedVisible = () => {
-    setIsExpectedVisible(s => !s);
-  }
-
-  const expectedResult = useMemo(() => {
-    const expectedData = patterns[difficulty];
-
-    return expectedData || [];
-  }, [difficulty])
 
   const updateBoardData = useMemo(() => {
     if (!isGameStarted) return noop;
 
     return (data: boolean[][]) => {
       setBoardData(data);
-
-      if (!compareBoards(data, expectedResult)) {
-        // needs a smallest timeout since modal appers faster then the square updates
-        setTimeout(() => alert('Congratulations, you passed the level correctly!'), 100);
-      }
     }
-  }, [isGameStarted, expectedResult]);
+  }, [isGameStarted]);
 
   const startButtonHandler = useMemo(() => isGameStarted ? restartGame : startGame, [isGameStarted, startGame, restartGame]);
 
@@ -89,18 +73,9 @@ export const Game: FunctionComponent = () => {
           selectDifficulty={selectDifficulty}
           startButtonText={startButtonText}
           onStart={startButtonHandler}
-          toggleIsExpectedVisible={toggleIsExpectedVisible}
-          isExpectedVisible={isExpectedVisible}
         />
       </div>
-      <div className={styles.board}>
-        <Board data={boardData} setData={updateBoardData} />
-        {isExpectedVisible && (
-          <div className={styles['expected-board']}>
-            <Board data={expectedResult} setData={noop} />
-          </div>
-        )}
-      </div>
+      <Board data={boardData} setData={updateBoardData} />
     </div>
   )
 }
