@@ -1,21 +1,14 @@
-import { FunctionComponent, useEffect, useState, useMemo, MouseEvent } from 'react';
-import { createCleanBoard } from './utils';
+import { FunctionComponent, useMemo, MouseEvent, Dispatch, SetStateAction } from 'react';
 import { Row } from '../Row';
 
 import styles from './styles.module.css'
 
 export interface BoardProps {
-  size?: number;
+  data: boolean[][];
+  setData: Dispatch<SetStateAction<boolean[][]>>;
 }
 
-export const Board: FunctionComponent<BoardProps> = ({ size = 5 }) => {
-  const [data, setData] = useState<boolean[][]>(createCleanBoard(size));
-
-  // reset the board when size changes
-  useEffect(() => {
-    setData(createCleanBoard(size));
-  }, [size, setData]);
-
+export const Board: FunctionComponent<BoardProps> = ({ data, setData }) => {
   const boardRender = useMemo(() =>
     data.map((row, id) => (
       <Row key={id} row={row} rowId={id} />

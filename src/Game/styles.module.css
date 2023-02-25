@@ -1,0 +1,10 @@
+.wrap {
+  margin: auto;
+  width: fit-content;
+}
+
+.controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
