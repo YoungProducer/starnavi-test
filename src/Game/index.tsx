@@ -60,10 +60,8 @@ export const Game: FunctionComponent = () => {
   const expectedResult = useMemo(() => {
     const expectedData = patterns[difficulty];
 
-    if (!isGameStarted || !isExpectedVisible) return [];
-
-    return expectedData;
-  }, [isGameStarted, isExpectedVisible, difficulty])
+    return expectedData || [];
+  }, [difficulty])
 
   const updateBoardData = useMemo(() => {
     if (!isGameStarted) return noop;
@@ -73,7 +71,7 @@ export const Game: FunctionComponent = () => {
 
       if (!compareBoards(data, expectedResult)) {
         // needs a smallest timeout since modal appers faster then the square updates
-        setTimeout(() => alert('Congratulations, you passed the level correctly!'));
+        setTimeout(() => alert('Congratulations, you passed the level correctly!'), 100);
       }
     }
   }, [isGameStarted, expectedResult]);
@@ -97,9 +95,11 @@ export const Game: FunctionComponent = () => {
       </div>
       <div className={styles.board}>
         <Board data={boardData} setData={updateBoardData} />
-        <div className={styles['expected-board']}>
-          <Board data={expectedResult} setData={noop} />
-        </div>
+        {isExpectedVisible && (
+          <div className={styles['expected-board']}>
+            <Board data={expectedResult} setData={noop} />
+          </div>
+        )}
       </div>
     </div>
   )
