@@ -1,0 +1,4 @@
+.board {
+  width: min-content;
+  border: 1px solid #333;
+}
